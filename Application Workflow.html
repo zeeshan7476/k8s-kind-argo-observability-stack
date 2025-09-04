@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes DevOps with Argo CD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: #4fd1c5;
+            text-shadow: 0 0 15px rgba(79, 209, 197, 0.7);
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            color: #a0aec0;
+            margin-bottom: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(26, 32, 44, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5);
+        }
+        
+        .architecture {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto;
+            gap: 25px;
+            grid-template-areas:
+                "user user user"
+                "gitops workflow deploy"
+                "cluster cluster cluster"
+                "monitoring monitoring monitoring";
+        }
+        
+        .component {
+            background: #2d3748;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .component:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .user { 
+            grid-area: user; 
+            border-top: 4px solid #ed8936;
+            text-align: center;
+        }
+        
+        .gitops { 
+            grid-area: gitops; 
+            border-top: 4px solid #4299e1;
+        }
+        
+        .workflow { 
+            grid-area: workflow; 
+            border-top: 4px solid #4fd1c5;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .deploy { 
+            grid-area: deploy; 
+            border-top: 4px solid #48bb78;
+        }
+        
+        .cluster { 
+            grid-area: cluster; 
+            border-top: 4px solid #9f7aea;
+        }
+        
+        .monitoring { 
+            grid-area: monitoring; 
+            border-top: 4px solid #f56565;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h2 i {
+            font-size: 1.8rem;
+        }
+        
+        ul {
+            list-style-type: none;
+            padding-left: 10px;
+        }
+        
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        li:last-child {
+            border-bottom: none;
+        }
+        
+        .cluster-components {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .cluster-component {
+            background: rgba(45, 55, 72, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .monitoring-components {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .monitoring-component {
+            background: rgba(45, 55, 72, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .flow-direction {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4fd1c5;
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .argo-highlight {
+            background: rgba(33, 150, 243, 0.2);
+            border-left: 4px solid #2196f3;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .argo-color {
+            color: #2196f3;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 40px;
+            padding: 25px;
+            background: rgba(26, 32, 44, 0.9);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border: 2px solid;
+            border-radius: 4px;
+            margin-right: 12px;
+        }
+        
+        .legend-text {
+            font-size: 16px;
+            color: #cbd5e0;
+        }
+        
+        @media (max-width: 900px) {
+            .architecture {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "user"
+                    "gitops"
+                    "workflow"
+                    "deploy"
+                    "cluster"
+                    "monitoring";
+            }
+            
+            .cluster-components {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .monitoring-components {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Kubernetes DevOps with Argo CD</h1>
+        <p class="subtitle">GitOps workflow with monitoring using Helm</p>
+    </div>
+    
+    <div class="container">
+        <div class="architecture">
+            <div class="component user">
+                <h2><i>👤</i> User / Developer</h2>
+                <p>Pushes code changes to Git repository, triggering the GitOps workflow</p>
+            </div>
+            
+            <div class="component gitops">
+                <h2><i>🔄</i> GitOps (Argo CD)</h2>
+                <ul>
+                    <li><i>📁</i> Monitors Git repository for changes</li>
+                    <li><i>🔄</i> Automatically syncs desired state</li>
+                    <li><i>⚡</i> Continuous deployment</li>
+                    <li><i>✅</i> Health status checks</li>
+                    <li><i>📊</i> Rollback capabilities</li>
+                </ul>
+                <div class="argo-highlight">
+                    <p><strong class="argo-color">Argo CD</strong> provides declarative, GitOps continuous delivery for Kubernetes applications.</p>
+                </div>
+            </div>
+            
+            <div class="component workflow">
+                <h2>GitOps Workflow</h2>
+                <div class="flow-direction">
+                    <span>⬅️</span> Git Repo → Argo CD → Kubernetes <span>➡️</span>
+                </div>
+                <p>Declarative continuous deployment with automatic synchronization</p>
+            </div>
+            
+            <div class="component deploy">
+                <h2><i>🚀</i> Deploy</h2>
+                <ul>
+                    <li><i>📦</i> Application deployment</li>
+                    <li><i>🔧</i> Configuration management</li>
+                    <li><i>📊</i> Metrics collection</li>
+                    <li><i>🔔</i> Notification system</li>
+                </ul>
+            </div>
+            
+            <div class="component cluster">
+                <h2><i>☸️</i> Kubernetes Cluster</h2>
+                <div class="cluster-components">
+                    <div class="cluster-component">
+                        <h3>Control Plane</h3>
+                        <p>API Server, Scheduler, Controller Manager, etcd</p>
+                    </div>
+                    <div class="cluster-component">
+                        <h3>Node 1</h3>
+                        <p>Worker node running application pods</p>
+                    </div>
+                    <div class="cluster-component">
+                        <h3>Node 2</h3>
+                        <p>Worker node running application pods</p>
+                    </div>
+                    <div class="cluster-component">
+                        <h3>Argo CD</h3>
+                        <p>GitOps operator running in Kubernetes</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="component monitoring">
+                <h2><i>📊</i> Monitoring</h2>
+                <p>Using Helm charts for deployment and management</p>
+                <div class="monitoring-components">
+                    <div class="monitoring-component">
+                        <h3>Prometheus</h3>
+                        <p>Metrics collection and time-series database</p>
+                    </div>
+                    <div class="monitoring-component">
+                        <h3>Grafana</h3>
+                        <p>Visualization and dashboarding platform</p>
+                    </div>
+                    <div class="monitoring-component">
+                        <h3>Argo CD UI</h3>
+                        <p>Web interface for visualization and management</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="border-color: #ed8936;"></div>
+            <div class="legend-text">User/Developer</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="border-color: #4299e1;"></div>
+            <div class="legend-text">GitOps (Argo CD)</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="border-color: #4fd1c5;"></div>
+            <div class="legend-text">Workflow/Process</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="border-color: #48bb78;"></div>
+            <div class="legend-text">Deployment</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="border-color: #9f7aea;"></div>
+            <div class="legend-text">Kubernetes Cluster</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="border-color: #f56565;"></div>
+            <div class="legend-text">Monitoring Stack</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="border-color: #2196f3;"></div>
+            <div class="legend-text">Argo CD Components</div>
+        </div>
+    </div>
+</body>
+</html>
