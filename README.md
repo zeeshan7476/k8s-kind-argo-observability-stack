@@ -50,8 +50,10 @@ The architecture demonstrates how applications are deployed, managed, and monito
 ## 📂 Files in This Repo
  `k8s-kind-argo-observability-stack.png` → High-quality PNG image
 
-## 📊 Diagram
-
+## 📊 Diagrams
+## k8s-kind-argo-gitops
+![Architecture diagram](./k8s-kind-argo-gitops-stack.png)
+## k8s-kind-argo-observability-stack
 ![Kubernetes Architecture](./k8s-kind-argo-observability-stack.png)
 
 ## 🔮 Future Enhancements
