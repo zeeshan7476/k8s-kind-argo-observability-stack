@@ -48,9 +48,7 @@ The architecture demonstrates how applications are deployed, managed, and monito
 - Grafana
 
 ## 📂 Files in This Repo
-- `k8s_architecture_diagram.svg` → Editable vector diagram
-- `k8s_architecture_diagram.png` → High-quality PNG image
-- `k8s_architecture_diagram.pdf` → PDF version of the diagram
+ `k8s-kind-argo-observability-stack.png` → High-quality PNG image
 
 ## 📊 Diagram
 
